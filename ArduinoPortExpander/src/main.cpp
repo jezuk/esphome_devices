@@ -13,6 +13,16 @@ Ports:
 #include <Arduino.h>
 #include <Wire.h>
 
+
+#include "FlexiTimer2.h"
+
+#include "defsAndInputs.h"
+
+#define USE_LCD 0
+#include "lcdAndRelays.h"
+
+
+
 #define DEBUG // remove debug so pin 0 and 1 can be used for IO
 
 #define I2C_ADDRESS 8
@@ -32,6 +42,8 @@ void setup()
   Wire.begin(I2C_ADDRESS);
   Wire.onRequest(onRequest);
   Wire.onReceive(onReceive);
+
+  initIO();
 
 #ifdef DEBUG
   Serial.println(F("Wire ok"));
@@ -158,7 +170,13 @@ void onReceive(int numBytes)
   case CMD_WRITE_DIGITAL_LOW:
   {
     bool output = cmd == CMD_WRITE_DIGITAL_HIGH;
-    digitalWrite(pin, output);
+    if(output) {
+      setRelay(pin);
+    }
+    else {
+      resetRelay(pin);
+    }
+    // digitalWrite(pin, output);
 #ifdef DEBUG
     Serial.print(F("Pin "));
     Serial.print(pin);
